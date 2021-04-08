@@ -51,7 +51,10 @@ var Game = function () {
   ;
 
   this.isPlayable = function (howManyPlayers) {
-    return howManyPlayers >= 2;
+    if(this.howManyPlayers() <= 1 || this.howManyPlayers() >= 7){
+      return false
+    }
+    return true;
   };
 
   this.add = function (playerName) {
@@ -176,16 +179,23 @@ game.add('Chet');
 game.add('Pat');
 game.add('Sue');
 
-do {
+console.log('Number of players', game.howManyPlayers())
 
-  game.roll(Math.floor(Math.random() * 6) + 1);
+if(game.isPlayable()){
+  do {
 
-  if (Math.floor(Math.random() * 10) == 7) {
-    notAWinner = game.wrongAnswer();
-  } else {
-    notAWinner = game.wasCorrectlyAnswered();
-  }
-
-} while (notAWinner);
+    game.roll(Math.floor(Math.random() * 6) + 1);
+  
+    if (Math.floor(Math.random() * 10) == 7) {
+      notAWinner = game.wrongAnswer();
+    } else {
+      notAWinner = game.wasCorrectlyAnswered();
+    }
+  
+  } while (notAWinner);
+} 
+else {
+  console.log(`Game is not playable, check the number of players`)
+}
 
 module.exports = Game;
