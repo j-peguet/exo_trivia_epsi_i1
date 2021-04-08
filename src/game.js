@@ -11,9 +11,11 @@ var Game = function () {
   var places = new Array(6);
   var purses = new Array(6);
   var inPenaltyBox = new Array(6);
+  var timePenaltyBox = new Array(6);
   var playersJokers = new Array(6);
   var winStreak = new Array(6);
   var scoreToWin = 6;
+  var winners = new Array();
 
   var popQuestions = new Array();
   var scienceQuestions = new Array();
@@ -111,6 +113,7 @@ var Game = function () {
     inPenaltyBox[this.howManyPlayers() - 1] = false;
     playersJokers[this.howManyPlayers() - 1] = true;
     winStreak[this.howManyPlayers() - 1] = 0;
+    timePenaltyBox[this.howManyPlayers() - 1] = 0;
 
     console.log(playerName + " was added");
     console.log("They are player number " + players.length);
@@ -140,7 +143,12 @@ var Game = function () {
     console.log("They have rolled a " + roll);
 
     if (inPenaltyBox[currentPlayer]) {
-      if (roll % 2 != 0) {
+      let chance = (1/timePenaltyBox[currentPlayer])*100;
+      let tirage = Math.floor(Math.random() * 100) + 1;
+      console.log("Number of time in Prison: " + timePenaltyBox[currentPlayer]);
+      console.log("Chance to escape: " + chance + "%");
+      console.log("Your escape roll: " + tirage);
+      if (tirage <= chance) {
         isGettingOutOfPenaltyBox = true;
         inPenaltyBox[currentPlayer] = false;
 
@@ -179,12 +187,26 @@ var Game = function () {
 
     console.log("Your current win streak: " + chalk.magentaBright(winStreak[currentPlayer]));
 
-    var winner = didPlayerWin();
+
+    if(!didPlayerWin()){
+      console.log(chalk.yellow("New winner: " + players[currentPlayer]))
+      winners.push(players[currentPlayer])
+      this.removeCurrentPlayer()
+    }
+
+    if(!this.isPlayable()){
+      let leaderboard = [...winners, ...players]
+      console.log("Leaderboard")
+      leaderboard.map((winner, index) => {
+        console.log((index + 1) + " : " + winner)
+      })
+    }
+
     currentPlayer += 1;
     if (currentPlayer == players.length)
       currentPlayer = 0;
 
-    return winner;
+    return this.isPlayable();
   }
 
   this.wasCorrectlyAnswered = function () {
@@ -205,7 +227,10 @@ var Game = function () {
   this.wrongAnswer = function () {
     console.log('Question was incorrectly answered');
     console.log(players[currentPlayer] + " was sent to the penalty box");
-    inPenaltyBox[currentPlayer] = true;
+    if(!inPenaltyBox[currentPlayer]){
+      inPenaltyBox[currentPlayer] = true;
+      timePenaltyBox[currentPlayer] += 1;
+    }
     winStreak[currentPlayer] = 0;
 
     currentPlayer += 1;
@@ -228,16 +253,22 @@ var Game = function () {
       currentPlayer = 0;
   };
 
-  this.abortPlayer = function () {
-    console.log(chalk.red(players[currentPlayer] + " left the game"));
+  this.removeCurrentPlayer = function () {
     players.splice(currentPlayer, 1)
     places.splice(currentPlayer, 1);
     purses.splice(currentPlayer, 1);
     inPenaltyBox.splice(currentPlayer, 1);
     playersJokers.splice(currentPlayer, 1);
 
-    if (currentPlayer == players.length)
+    if (currentPlayer == players.length){
       currentPlayer = 0;
+    }
+  }
+
+  this.abortPlayer = function () {
+    console.log(chalk.red(players[currentPlayer] + " left the game"));
+    
+    this.removeCurrentPlayer()
   };
 };
 
