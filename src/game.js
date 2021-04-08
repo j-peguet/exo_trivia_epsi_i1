@@ -19,8 +19,10 @@ var Game = function () {
   var scienceQuestions = new Array();
   var sportsQuestions = new Array();
   var rockQuestions = new Array();
+  var allCategories = new Array("Pop", "Science", "Sports");
   var modulableCategories = new Array("Rock", "Techno");
   var modulableCategorie = new String("")
+  var nextCategorie = new String("");
 
   var currentPlayer = 0;
   var isGettingOutOfPenaltyBox = false;
@@ -30,6 +32,11 @@ var Game = function () {
   };
 
   var currentCategory = function () {
+    if(nextCategorie !== "" ){
+      let tempo = nextCategorie
+      nextCategorie = "";
+      return tempo;
+    }
     if (places[currentPlayer] == 0)
       return 'Pop';
     if (places[currentPlayer] == 4)
@@ -54,11 +61,20 @@ var Game = function () {
   this.getmodulableCategories = function () {
     return modulableCategories;
   }
+  
+  this.getAllCategories = function () {
+    return allCategories;
+  }
 
   this.setModulableCategorie = function (categorie) {
     console.log("------")
     console.log(categorie)
     modulableCategorie = new String(categorie);
+    allCategories.push(modulableCategorie.toString());
+  }
+  
+  this.setNextCategorie = function (categorie) {
+    nextCategorie = new String(categorie);
   }
   
   this.setScoreToWin = function (score) {
@@ -287,6 +303,14 @@ async function main() {
 
           if (answer == 7) {
             notAWinner = game.wrongAnswer();
+            console.log(game.getAllCategories());
+            let nextCategorieAnswer
+            do {
+              nextCategorieAnswer = await question(`Choose the next category question : `)
+            } while (!game.getAllCategories().includes(nextCategorieAnswer))
+
+            game.setNextCategorie(nextCategorieAnswer);
+
           } else {
             notAWinner = game.wasCorrectlyAnswered();
           }
