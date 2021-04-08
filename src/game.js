@@ -12,6 +12,7 @@ var Game = function () {
   var purses = new Array(6);
   var inPenaltyBox = new Array(6);
   var playersJokers = new Array(6);
+  var winStreak = new Array(6);
   var scoreToWin = 6;
 
   var popQuestions = new Array();
@@ -93,6 +94,7 @@ var Game = function () {
     purses[this.howManyPlayers() - 1] = 0;
     inPenaltyBox[this.howManyPlayers() - 1] = false;
     playersJokers[this.howManyPlayers() - 1] = true;
+    winStreak[this.howManyPlayers() - 1] = 0;
 
     console.log(playerName + " was added");
     console.log("They are player number " + players.length);
@@ -153,9 +155,12 @@ var Game = function () {
 
   this.addScoreToPlayer = function () {
     console.log("Answer was correct!!!!");
-    purses[currentPlayer] += 5;
+    winStreak[currentPlayer] += 1;
+    purses[currentPlayer] += winStreak[currentPlayer];
     console.log(players[currentPlayer] + " now has " +
-      purses[currentPlayer] + " Gold Coins.");
+    chalk.yellow(purses[currentPlayer]) + " Gold Coins.");
+
+    console.log("Your current win streak: " + chalk.magentaBright(winStreak[currentPlayer]));
 
     var winner = didPlayerWin();
     currentPlayer += 1;
@@ -184,6 +189,7 @@ var Game = function () {
     console.log('Question was incorrectly answered');
     console.log(players[currentPlayer] + " was sent to the penalty box");
     inPenaltyBox[currentPlayer] = true;
+    winStreak[currentPlayer] = 0;
 
     currentPlayer += 1;
     if (currentPlayer == players.length)
