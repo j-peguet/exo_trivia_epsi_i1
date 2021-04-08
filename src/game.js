@@ -12,6 +12,7 @@ var Game = function () {
   var purses = new Array(6);
   var inPenaltyBox = new Array(6);
   var timePenaltyBox = new Array(6);
+  var timeTurnPenaltyBox = new Array(6);
   var playersJokers = new Array(6);
   var winStreak = new Array(6);
   var scoreToWin = 6;
@@ -28,6 +29,21 @@ var Game = function () {
 
   var currentPlayer = 0;
   var isGettingOutOfPenaltyBox = false;
+
+  this.resetGame = function () {
+    players = new Array();
+    places = new Array(6);
+    purses = new Array(6);
+    inPenaltyBox = new Array(6);
+    timePenaltyBox = new Array(6);
+    playersJokers = new Array(6);
+    winStreak = new Array(6);
+    winners = new Array();
+    currentPlayer = 0;
+    isGettingOutOfPenaltyBox = false;
+
+    nextCategorie = new String("");
+  }
 
   var didPlayerWin = function () {
     return !(purses[currentPlayer] >= scoreToWin)
@@ -62,6 +78,10 @@ var Game = function () {
 
   this.getmodulableCategories = function () {
     return modulableCategories;
+  }
+  
+  this.getmodulableCategorie = function () {
+    return modulableCategorie;
   }
   
   this.getAllCategories = function () {
@@ -114,6 +134,7 @@ var Game = function () {
     playersJokers[this.howManyPlayers() - 1] = true;
     winStreak[this.howManyPlayers() - 1] = 0;
     timePenaltyBox[this.howManyPlayers() - 1] = 0;
+    timeTurnPenaltyBox[this.howManyPlayers() - 1] = 0;
 
     console.log(playerName + " was added");
     console.log("They are player number " + players.length);
@@ -143,14 +164,16 @@ var Game = function () {
     console.log("They have rolled a " + roll);
 
     if (inPenaltyBox[currentPlayer]) {
-      let chance = (1/timePenaltyBox[currentPlayer])*100;
+      let chance = ((1/timePenaltyBox[currentPlayer])*100) + ((timeTurnPenaltyBox[currentPlayer] * 0.1) * 100);
       let tirage = Math.floor(Math.random() * 100) + 1;
       console.log("Number of time in Prison: " + timePenaltyBox[currentPlayer]);
-      console.log("Chance to escape: " + chance + "%");
-      console.log("Your escape roll: " + tirage);
+      console.log("Number of turn in same Prison: " + timeTurnPenaltyBox[currentPlayer]);
+      console.log("Chance to escape: " + chalk.cyanBright(chance) + "%");
+      console.log("Your escape roll: " + chalk.cyanBright(tirage));
       if (tirage <= chance) {
         isGettingOutOfPenaltyBox = true;
         inPenaltyBox[currentPlayer] = false;
+        timeTurnPenaltyBox[currentPlayer] = 0;
 
         console.log(players[currentPlayer] + " is getting out of the penalty box");
         places[currentPlayer] = places[currentPlayer] + roll;
@@ -230,6 +253,8 @@ var Game = function () {
     if(!inPenaltyBox[currentPlayer]){
       inPenaltyBox[currentPlayer] = true;
       timePenaltyBox[currentPlayer] += 1;
+    } else {
+      timeTurnPenaltyBox[currentPlayer] += 1;
     }
     winStreak[currentPlayer] = 0;
 
@@ -272,35 +297,39 @@ var Game = function () {
   };
 };
 
+let init_player = ['Jules','Julian','Clement']
 
 async function main() {
 
+  var game = new Game();
+  do {
+
   var notAWinner = true;
 
-  var game = new Game();
+  console.log("-----")
+  console.log(chalk.hex('#30c3bd')("New Game"))
+  console.log("-----")
 
-  game.add('Jules');
-  game.add('Cedric');
-  game.add('Clement');
+  init_player.forEach(e=>game.add(e))
 
   console.log('Number of players', game.howManyPlayers());
 
   if (game.isPlayable()) {
-    let category
-    do {
-      category = await question(`Wich category do you want to play ? Rock or Techno : `)
-    } while (!game.getmodulableCategories().includes(category))
+    if(game.getmodulableCategorie() == ""){
+      let category
+      do {
+        category = await question(`Wich category do you want to play ? Rock or Techno : `)
+      } while (!game.getmodulableCategories().includes(category))
+      game.setModulableCategorie(category);
+      game.createQuestion();
 
+      let scoreToWin
+      do {
+        scoreToWin = await question(`Wich score the player need to win (minimun 6) : `)
+      } while (scoreToWin < 6)
 
-    game.setModulableCategorie(category);
-    game.createQuestion();
-
-    let scoreToWin
-    do {
-      scoreToWin = await question(`Wich score the player need to win (minimun 6) : `)
-    } while (scoreToWin < 6)
-
-    game.setScoreToWin(scoreToWin)
+      game.setScoreToWin(scoreToWin)
+    }
     
     do {
 
@@ -310,7 +339,7 @@ async function main() {
         game.roll(Math.floor(Math.random() * 6) + 1);
         let abort_answer
       do {
-        abort_answer = await question(`Do you want to quit the game ? (yes or no) :`)
+        abort_answer = await question(`Do you want to quit the game ? ${chalk.underline("(YES or NO)")} :`)
       } while (!new Array("yes", "no").includes(abort_answer))
 
       if (abort_answer === "yes") {
@@ -321,7 +350,7 @@ async function main() {
         if (game.currentUserHaveJoker()) {
 
           do {
-            joker_answer = await question(`Do you want to use a Joker ? (yes or no) :`)
+            joker_answer = await question(`Do you want to use a Joker ? ${chalk.underline("(YES or NO)")} :`)
           } while (!new Array("yes", "no").includes(joker_answer))
         }
 
@@ -358,6 +387,11 @@ async function main() {
   } else {
     console.log(`Game is not playable, check the number of players`)
   }
+
+
+  game.resetGame()
+}
+while(await question(`Replay with same configuration ${chalk.underline("(YES or NO)")} ? `) == "yes")
 
   rl.close()
 }
