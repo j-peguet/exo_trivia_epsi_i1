@@ -12,6 +12,8 @@ var Game = function () {
   var purses = new Array(6);
   var inPenaltyBox = new Array(6);
   var playersJokers = new Array(6);
+  var winStreak = new Array(6);
+  var scoreToWin = 6;
 
   var popQuestions = new Array();
   var scienceQuestions = new Array();
@@ -24,7 +26,7 @@ var Game = function () {
   var isGettingOutOfPenaltyBox = false;
 
   var didPlayerWin = function () {
-    return !(purses[currentPlayer] == 6)
+    return !(purses[currentPlayer] >= scoreToWin)
   };
 
   var currentCategory = function () {
@@ -58,6 +60,12 @@ var Game = function () {
     console.log(categorie)
     modulableCategorie = new String(categorie);
   }
+  
+  this.setScoreToWin = function (score) {
+    console.log("------")
+    console.log("Score to WIN the game: ", score)
+    scoreToWin = score;
+  }
 
   this.createRockQuestion = function (categorie, index) {
     return categorie + " Question " + index;
@@ -86,6 +94,7 @@ var Game = function () {
     purses[this.howManyPlayers() - 1] = 0;
     inPenaltyBox[this.howManyPlayers() - 1] = false;
     playersJokers[this.howManyPlayers() - 1] = true;
+    winStreak[this.howManyPlayers() - 1] = 0;
 
     console.log(playerName + " was added");
     console.log("They are player number " + players.length);
@@ -144,43 +153,35 @@ var Game = function () {
     }
   };
 
+  this.addScoreToPlayer = function () {
+    console.log("Answer was correct!!!!");
+    winStreak[currentPlayer] += 1;
+    purses[currentPlayer] += winStreak[currentPlayer];
+    console.log(players[currentPlayer] + " now has " +
+    chalk.yellow(purses[currentPlayer]) + " Gold Coins.");
+
+    console.log("Your current win streak: " + chalk.magentaBright(winStreak[currentPlayer]));
+
+    var winner = didPlayerWin();
+    currentPlayer += 1;
+    if (currentPlayer == players.length)
+      currentPlayer = 0;
+
+    return winner;
+  }
+
   this.wasCorrectlyAnswered = function () {
     if (inPenaltyBox[currentPlayer]) {
       if (isGettingOutOfPenaltyBox) {
-        console.log('Answer was correct!!!!');
-        purses[currentPlayer] += 1;
-        console.log(players[currentPlayer] + " now has " +
-          purses[currentPlayer] + " Gold Coins.");
-
-        var winner = didPlayerWin();
-        currentPlayer += 1;
-        if (currentPlayer == players.length)
-          currentPlayer = 0;
-
-        return winner;
+        return this.addScoreToPlayer();
       } else {
         currentPlayer += 1;
         if (currentPlayer == players.length)
           currentPlayer = 0;
         return true;
       }
-
-
     } else {
-
-      console.log("Answer was correct!!!!");
-
-      purses[currentPlayer] += 1;
-      console.log(players[currentPlayer] + " now has " +
-        purses[currentPlayer] + " Gold Coins.");
-
-      var winner = didPlayerWin();
-
-      currentPlayer += 1;
-      if (currentPlayer == players.length)
-        currentPlayer = 0;
-
-      return winner;
+      return this.addScoreToPlayer();
     }
   };
 
@@ -188,6 +189,7 @@ var Game = function () {
     console.log('Question was incorrectly answered');
     console.log(players[currentPlayer] + " was sent to the penalty box");
     inPenaltyBox[currentPlayer] = true;
+    winStreak[currentPlayer] = 0;
 
     currentPlayer += 1;
     if (currentPlayer == players.length)
@@ -238,14 +240,20 @@ async function main() {
   if (game.isPlayable()) {
     let category
     do {
-      category = await question(`Witch category do you want to play ? Rock or Techno : `)
+      category = await question(`Wich category do you want to play ? Rock or Techno : `)
     } while (!game.getmodulableCategories().includes(category))
 
 
     game.setModulableCategorie(category);
     game.createQuestion();
 
+    let scoreToWin
+    do {
+      scoreToWin = await question(`Wich score the player need to win (minimun 6) : `)
+    } while (scoreToWin < 6)
 
+    game.setScoreToWin(scoreToWin)
+    
     do {
 
       if (game.isPlayable()) {
@@ -298,8 +306,8 @@ async function main() {
   rl.close()
 }
 
+if(process.env.NODE_ENV!='test'){
+  main()
+}
 
-main()
-
-
-module.exports = Game;
+module.exports = {Game:Game,rl:rl};
