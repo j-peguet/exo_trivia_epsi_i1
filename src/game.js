@@ -113,6 +113,7 @@ var Game = function () {
     if (inPenaltyBox[currentPlayer]) {
       if (roll % 2 != 0) {
         isGettingOutOfPenaltyBox = true;
+        inPenaltyBox[currentPlayer] = false;
 
         console.log(players[currentPlayer] + " is getting out of the penalty box");
         places[currentPlayer] = places[currentPlayer] + roll;
@@ -201,7 +202,6 @@ async function main(){
 
   game.add('Chet');
   game.add('Pat');
-  game.add('Sue');
 
   console.log('Number of players', game.howManyPlayers());
 
@@ -214,13 +214,18 @@ async function main(){
 
   game.setModulableCategorie(category);
   game.createQuestion();
-  rl.close()
+
   
     do {
   
       game.roll(Math.floor(Math.random() * 6) + 1);
     
-      if (Math.floor(Math.random() * 10) == 7) {
+      let answer
+      do{
+        answer = await question(`Your answer :`)
+      }while(isNaN(answer))
+
+      if (answer == 7) {
         notAWinner = game.wrongAnswer();
       } else {
         notAWinner = game.wasCorrectlyAnswered();
@@ -231,6 +236,8 @@ async function main(){
   else {
     console.log(`Game is not playable, check the number of players`)
   }
+
+  rl.close()
 } 
 
 
