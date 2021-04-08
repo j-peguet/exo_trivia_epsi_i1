@@ -11,6 +11,7 @@ var Game = function () {
   var places = new Array(6);
   var purses = new Array(6);
   var inPenaltyBox = new Array(6);
+  var timePenaltyBox = new Array(6);
   var playersJokers = new Array(6);
   var winStreak = new Array(6);
   var scoreToWin = 6;
@@ -111,6 +112,7 @@ var Game = function () {
     inPenaltyBox[this.howManyPlayers() - 1] = false;
     playersJokers[this.howManyPlayers() - 1] = true;
     winStreak[this.howManyPlayers() - 1] = 0;
+    timePenaltyBox[this.howManyPlayers() - 1] = 0;
 
     console.log(playerName + " was added");
     console.log("They are player number " + players.length);
@@ -139,7 +141,12 @@ var Game = function () {
     console.log("They have rolled a " + roll);
 
     if (inPenaltyBox[currentPlayer]) {
-      if (roll % 2 != 0) {
+      let chance = (1/timePenaltyBox[currentPlayer])*100;
+      let tirage = Math.floor(Math.random() * 100) + 1;
+      console.log("Number of time in Prison: " + timePenaltyBox[currentPlayer]);
+      console.log("Chance to escape: " + chance + "%");
+      console.log("Your escape roll: " + tirage);
+      if (tirage <= chance) {
         isGettingOutOfPenaltyBox = true;
         inPenaltyBox[currentPlayer] = false;
 
@@ -204,7 +211,10 @@ var Game = function () {
   this.wrongAnswer = function () {
     console.log('Question was incorrectly answered');
     console.log(players[currentPlayer] + " was sent to the penalty box");
-    inPenaltyBox[currentPlayer] = true;
+    if(!inPenaltyBox[currentPlayer]){
+      inPenaltyBox[currentPlayer] = true;
+      timePenaltyBox[currentPlayer] += 1;
+    }
     winStreak[currentPlayer] = 0;
 
     currentPlayer += 1;
