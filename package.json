@@ -8,7 +8,9 @@
   },
   "author": "",
   "license": "GPL v3",
-  "dependencies": {},
+  "dependencies": {
+    "chalk": "^4.1.0"
+  },
   "devDependencies": {
     "mocha": "^5.2.0",
     "should": "^13.2.1"

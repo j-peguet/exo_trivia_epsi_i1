@@ -4,6 +4,7 @@ const rl = readline.createInterface({
   output: process.stdout
 })
 const question = question_text => new Promise((resolve, reject) => rl.question(question_text, answer => resolve(answer)))
+const chalk = require('chalk');
 
 var Game = function () {
   var players = new Array();
@@ -109,7 +110,7 @@ var Game = function () {
   };
 
   this.roll = function (roll) {
-    console.log(players[currentPlayer] + " is the current player");
+    console.log(chalk.cyan(players[currentPlayer]) + " is the current player");
     console.log("They have rolled a " + roll);
 
     if (inPenaltyBox[currentPlayer]) {
@@ -200,7 +201,7 @@ var Game = function () {
   }
 
   this.jokerAnswer = function () {
-    console.log('Joker use');
+    console.log(chalk.greenBright('Joker use'));
     playersJokers[currentPlayer] = false;
 
     currentPlayer += 1;
@@ -209,7 +210,7 @@ var Game = function () {
   };
 
   this.abortPlayer = function () {
-    console.log(players[currentPlayer] + " left the game");
+    console.log(chalk.red(players[currentPlayer] + " left the game"));
     players.splice(currentPlayer, 1)
     places.splice(currentPlayer, 1);
     purses.splice(currentPlayer, 1);
@@ -228,9 +229,9 @@ async function main() {
 
   var game = new Game();
 
-  game.add('Chet');
-  game.add('Pat');
-  game.add('Clem');
+  game.add('Jules');
+  game.add('Cedric');
+  game.add('Clement');
 
   console.log('Number of players', game.howManyPlayers());
 
@@ -248,9 +249,9 @@ async function main() {
     do {
 
       if (game.isPlayable()) {
+        console.log("-----")
 
         game.roll(Math.floor(Math.random() * 6) + 1);
-        
         let abort_answer
       do {
         abort_answer = await question(`Do you want to quit the game ? (yes or no) :`)
