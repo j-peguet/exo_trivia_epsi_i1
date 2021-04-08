@@ -1,3 +1,10 @@
+const readline = require('readline')
+const rl = readline.createInterface({
+    input: process.stdin,
+    output: process.stdout
+})
+const question = question_text => new Promise((resolve, reject) => rl.question(question_text, answer => resolve(answer)))
+
 var Game = function () {
   var players = new Array();
   var places = new Array(6);
@@ -8,6 +15,8 @@ var Game = function () {
   var scienceQuestions = new Array();
   var sportsQuestions = new Array();
   var rockQuestions = new Array();
+  var modulableCategories = new Array("Rock", "Techno");
+  var modulableCategorie = new String("")
 
   var currentPlayer = 0;
   var isGettingOutOfPenaltyBox = false;
@@ -35,20 +44,32 @@ var Game = function () {
       return 'Sports';
     if (places[currentPlayer] == 10)
       return 'Sports';
-    return 'Rock';
+    return modulableCategorie;
   };
 
-  this.createRockQuestion = function (index) {
-    return "Rock Question " + index;
-  };
-
-  for (var i = 0; i < 50; i++) {
-    popQuestions.push("Pop Question " + i);
-    scienceQuestions.push("Science Question " + i);
-    sportsQuestions.push("Sports Question " + i);
-    rockQuestions.push(this.createRockQuestion(i));
+  this.getmodulableCategories = function () {
+    return modulableCategories;
   }
-  ;
+
+  this.setModulableCategorie = function (categorie) {
+    console.log("------")
+    console.log(categorie)
+    modulableCategorie = new String(categorie);
+  }
+
+  this.createRockQuestion = function (categorie, index) {
+    return categorie + " Question " + index;
+  };
+
+
+  this.createQuestion = function () {
+    for (var i = 0; i < 50; i++) {
+      popQuestions.push("Pop Question " + i);
+      scienceQuestions.push("Science Question " + i);
+      sportsQuestions.push("Sports Question " + i);
+      rockQuestions.push(this.createRockQuestion(modulableCategorie, i));
+    };
+  }
 
   this.isPlayable = function (howManyPlayers) {
     if(this.howManyPlayers() <= 1 || this.howManyPlayers() >= 7){
@@ -81,7 +102,7 @@ var Game = function () {
       console.log(scienceQuestions.shift());
     if (currentCategory() == 'Sports')
       console.log(sportsQuestions.shift());
-    if (currentCategory() == 'Rock')
+    if (currentCategory() == modulableCategorie)
       console.log(rockQuestions.shift());
   };
 
@@ -171,31 +192,49 @@ var Game = function () {
   };
 };
 
-var notAWinner = false;
 
-var game = new Game();
+async function main(){
 
-game.add('Chet');
-game.add('Pat');
-game.add('Sue');
+  var notAWinner = false;
 
-console.log('Number of players', game.howManyPlayers())
+  var game = new Game();
 
-if(game.isPlayable()){
-  do {
+  game.add('Chet');
+  game.add('Pat');
+  game.add('Sue');
 
-    game.roll(Math.floor(Math.random() * 6) + 1);
+  console.log('Number of players', game.howManyPlayers());
+
+  let category
+  do{
+    category = await question(`Witch category do you want to play ? Rock or Techno : `)
+  }while(!game.getmodulableCategories().includes(category))
   
-    if (Math.floor(Math.random() * 10) == 7) {
-      notAWinner = game.wrongAnswer();
-    } else {
-      notAWinner = game.wasCorrectlyAnswered();
-    }
+
+  game.setModulableCategorie(category);
+  game.createQuestion();
+  rl.close()
   
-  } while (notAWinner);
+  if(game.isPlayable()){
+    do {
+  
+      game.roll(Math.floor(Math.random() * 6) + 1);
+    
+      if (Math.floor(Math.random() * 10) == 7) {
+        notAWinner = game.wrongAnswer();
+      } else {
+        notAWinner = game.wasCorrectlyAnswered();
+      }
+    
+    } while (notAWinner);
+  } 
+  else {
+    console.log(`Game is not playable, check the number of players`)
+  }
 } 
-else {
-  console.log(`Game is not playable, check the number of players`)
-}
+
+
+main()
+
 
 module.exports = Game;
