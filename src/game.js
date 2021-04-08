@@ -30,6 +30,21 @@ var Game = function () {
   var currentPlayer = 0;
   var isGettingOutOfPenaltyBox = false;
 
+  this.resetGame = function () {
+    players = new Array();
+    places = new Array(6);
+    purses = new Array(6);
+    inPenaltyBox = new Array(6);
+    timePenaltyBox = new Array(6);
+    playersJokers = new Array(6);
+    winStreak = new Array(6);
+    winners = new Array();
+    currentPlayer = 0;
+    isGettingOutOfPenaltyBox = false;
+
+    nextCategorie = new String("");
+  }
+
   var didPlayerWin = function () {
     return !(purses[currentPlayer] >= scoreToWin)
   };
@@ -63,6 +78,10 @@ var Game = function () {
 
   this.getmodulableCategories = function () {
     return modulableCategories;
+  }
+  
+  this.getmodulableCategorie = function () {
+    return modulableCategorie;
   }
   
   this.getAllCategories = function () {
@@ -277,35 +296,36 @@ var Game = function () {
   };
 };
 
+let init_player = ['Jules','Cedric','Clement']
 
 async function main() {
 
+  var game = new Game();
+  do {
+
   var notAWinner = true;
 
-  var game = new Game();
 
-  game.add('Jules');
-  game.add('Cedric');
-  game.add('Clement');
+  init_player.forEach(e=>game.add(e))
 
   console.log('Number of players', game.howManyPlayers());
 
   if (game.isPlayable()) {
-    let category
-    do {
-      category = await question(`Wich category do you want to play ? Rock or Techno : `)
-    } while (!game.getmodulableCategories().includes(category))
+    if(game.getmodulableCategorie() == ""){
+      let category
+      do {
+        category = await question(`Wich category do you want to play ? Rock or Techno : `)
+      } while (!game.getmodulableCategories().includes(category))
+      game.setModulableCategorie(category);
+      game.createQuestion();
 
+      let scoreToWin
+      do {
+        scoreToWin = await question(`Wich score the player need to win (minimun 6) : `)
+      } while (scoreToWin < 6)
 
-    game.setModulableCategorie(category);
-    game.createQuestion();
-
-    let scoreToWin
-    do {
-      scoreToWin = await question(`Wich score the player need to win (minimun 6) : `)
-    } while (scoreToWin < 6)
-
-    game.setScoreToWin(scoreToWin)
+      game.setScoreToWin(scoreToWin)
+    }
     
     do {
 
@@ -363,6 +383,11 @@ async function main() {
   } else {
     console.log(`Game is not playable, check the number of players`)
   }
+
+
+  game.resetGame()
+}
+while(await question("Replay with same configuration (yes or no) ? ") == "yes")
 
   rl.close()
 }
