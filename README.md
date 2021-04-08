@@ -1,7 +1,19 @@
-Test with node.js
-=================
+# Exo Trivia Maintenance Applicative
+> 8th April 2021
+---
 
-1. Install the dependencies with this command: `npm install`
-2. Run the tests with this command: `npm test`
+> https://github.com/jbrains/trivia/tree/master/nodejs
 
-    Any test source matching the pattern *.spec.js will be executed.
+## Groupe : Jules PEGUET, Cédric MENANTEAU, Clément BARANGER
+
+## Trello
+
+https://trello.com/b/HnN8cZsF/maintenance-evolutive
+
+## Setup
+
+```bash
+yarn install
+
+yarn test
+```
