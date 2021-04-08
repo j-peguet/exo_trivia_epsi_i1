@@ -125,13 +125,14 @@ var Game = function () {
 
   var askQuestion = function () {
     if (currentCategory() == 'Pop')
-      console.log(popQuestions.shift());
+      console.log(popQuestions[Math.floor(Math.random() * popQuestions.length)]);
+      //console.log(popQuestions.shift());
     if (currentCategory() == 'Science')
-      console.log(scienceQuestions.shift());
+      console.log(scienceQuestions[Math.floor(Math.random() * scienceQuestions.length)]);
     if (currentCategory() == 'Sports')
-      console.log(sportsQuestions.shift());
+      console.log(sportsQuestions[Math.floor(Math.random() * sportsQuestions.length)]);
     if (currentCategory() == modulableCategorie)
-      console.log(rockQuestions.shift());
+      console.log(rockQuestions[Math.floor(Math.random() * rockQuestions.length)]);
   };
 
   this.roll = function (roll) {
