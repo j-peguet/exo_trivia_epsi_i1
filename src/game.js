@@ -1,7 +1,7 @@
 const readline = require('readline')
 const rl = readline.createInterface({
-    input: process.stdin,
-    output: process.stdout
+  input: process.stdin,
+  output: process.stdout
 })
 const question = question_text => new Promise((resolve, reject) => rl.question(question_text, answer => resolve(answer)))
 
@@ -73,7 +73,7 @@ var Game = function () {
   }
 
   this.isPlayable = function (howManyPlayers) {
-    if(this.howManyPlayers() <= 1 || this.howManyPlayers() >= 7){
+    if (this.howManyPlayers() <= 1 || this.howManyPlayers() >= 7) {
       return false
     }
     return true;
@@ -149,7 +149,7 @@ var Game = function () {
         console.log('Answer was correct!!!!');
         purses[currentPlayer] += 1;
         console.log(players[currentPlayer] + " now has " +
-            purses[currentPlayer] + " Gold Coins.");
+          purses[currentPlayer] + " Gold Coins.");
 
         var winner = didPlayerWin();
         currentPlayer += 1;
@@ -171,7 +171,7 @@ var Game = function () {
 
       purses[currentPlayer] += 1;
       console.log(players[currentPlayer] + " now has " +
-          purses[currentPlayer] + " Gold Coins.");
+        purses[currentPlayer] + " Gold Coins.");
 
       var winner = didPlayerWin();
 
@@ -193,9 +193,9 @@ var Game = function () {
       currentPlayer = 0;
     return true;
   };
-  
 
-  this.currentUserHaveJoker = function (){
+
+  this.currentUserHaveJoker = function () {
     return playersJokers[currentPlayer]
   }
 
@@ -206,68 +206,96 @@ var Game = function () {
     currentPlayer += 1;
     if (currentPlayer == players.length)
       currentPlayer = 0;
-    return true;
+  };
+
+  this.abortPlayer = function () {
+    console.log(players[currentPlayer] + " left the game");
+    players.splice(currentPlayer, 1)
+    places.splice(currentPlayer, 1);
+    purses.splice(currentPlayer, 1);
+    inPenaltyBox.splice(currentPlayer, 1);
+    playersJokers.splice(currentPlayer, 1);
+
+    if (currentPlayer == players.length)
+      currentPlayer = 0;
   };
 };
 
 
-async function main(){
+async function main() {
 
-  var notAWinner = false;
+  var notAWinner = true;
 
   var game = new Game();
 
   game.add('Chet');
   game.add('Pat');
+  game.add('Clem');
 
   console.log('Number of players', game.howManyPlayers());
 
-  if(game.isPlayable()){
-  let category
-  do{
-    category = await question(`Witch category do you want to play ? Rock or Techno : `)
-  }while(!game.getmodulableCategories().includes(category))
-  
-
-  game.setModulableCategorie(category);
-  game.createQuestion();
-
-  
+  if (game.isPlayable()) {
+    let category
     do {
-  
-      game.roll(Math.floor(Math.random() * 6) + 1);
+      category = await question(`Witch category do you want to play ? Rock or Techno : `)
+    } while (!game.getmodulableCategories().includes(category))
 
-      let joker_answer
-      if (game.currentUserHaveJoker()){
+
+    game.setModulableCategorie(category);
+    game.createQuestion();
+
+
+    do {
+
+      if (game.isPlayable()) {
+
+        game.roll(Math.floor(Math.random() * 6) + 1);
         
-        do{
-          joker_answer = await question(`Do you want to use a Joker ? (yes or no) :`)
-        }while(!new Array("yes", "no").includes(joker_answer))
-      }
+        let abort_answer
+      do {
+        abort_answer = await question(`Do you want to quit the game ? (yes or no) :`)
+      } while (!new Array("yes", "no").includes(abort_answer))
 
-      if(joker_answer === "yes"){
-        notAWinner = game.jokerAnswer();
-      } else {
-        let answer
-        do{
-          answer = await question(`Your answer :`)
-        }while(isNaN(answer))
-  
-        if (answer == 7) {
-          notAWinner = game.wrongAnswer();
+      if (abort_answer === "yes") {
+        game.abortPlayer();
+      }
+      else {
+        let joker_answer
+        if (game.currentUserHaveJoker()) {
+
+          do {
+            joker_answer = await question(`Do you want to use a Joker ? (yes or no) :`)
+          } while (!new Array("yes", "no").includes(joker_answer))
+        }
+
+        if (joker_answer === "yes") {
+          game.jokerAnswer();
         } else {
-          notAWinner = game.wasCorrectlyAnswered();
+          let answer
+          do {
+            answer = await question(`Your answer :`)
+          } while (isNaN(answer))
+
+          if (answer == 7) {
+            notAWinner = game.wrongAnswer();
+          } else {
+            notAWinner = game.wasCorrectlyAnswered();
+          }
         }
       }
-    
+        
+      } else {
+        notAWinner = false;
+        console.log("Not enought player to continue the game")
+      }
+
     } while (notAWinner);
-  } 
-  else {
+  } else {
     console.log(`Game is not playable, check the number of players`)
   }
 
   rl.close()
-} 
+}
 
 
 main()
