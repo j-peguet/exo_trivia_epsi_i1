@@ -167,8 +167,9 @@ var Game = function () {
       let chance = ((1/timePenaltyBox[currentPlayer])*100) + ((timeTurnPenaltyBox[currentPlayer] * 0.1) * 100);
       let tirage = Math.floor(Math.random() * 100) + 1;
       console.log("Number of time in Prison: " + timePenaltyBox[currentPlayer]);
-      console.log("Chance to escape: " + chance + "%");
-      console.log("Your escape roll: " + tirage);
+      console.log("Number of turn in same Prison: " + timeTurnPenaltyBox[currentPlayer]);
+      console.log("Chance to escape: " + chalk.cyanBright(chance) + "%");
+      console.log("Your escape roll: " + chalk.cyanBright(tirage));
       if (tirage <= chance) {
         isGettingOutOfPenaltyBox = true;
         inPenaltyBox[currentPlayer] = false;
@@ -296,7 +297,7 @@ var Game = function () {
   };
 };
 
-let init_player = ['Jules','Cedric','Clement']
+let init_player = ['Jules','Julian','Clement']
 
 async function main() {
 
@@ -305,6 +306,9 @@ async function main() {
 
   var notAWinner = true;
 
+  console.log("-----")
+  console.log(chalk.hex('#30c3bd')("New Game"))
+  console.log("-----")
 
   init_player.forEach(e=>game.add(e))
 
@@ -335,7 +339,7 @@ async function main() {
         game.roll(Math.floor(Math.random() * 6) + 1);
         let abort_answer
       do {
-        abort_answer = await question(`Do you want to quit the game ? (yes or no) :`)
+        abort_answer = await question(`Do you want to quit the game ? ${chalk.underline("(YES or NO)")} :`)
       } while (!new Array("yes", "no").includes(abort_answer))
 
       if (abort_answer === "yes") {
@@ -346,7 +350,7 @@ async function main() {
         if (game.currentUserHaveJoker()) {
 
           do {
-            joker_answer = await question(`Do you want to use a Joker ? (yes or no) :`)
+            joker_answer = await question(`Do you want to use a Joker ? ${chalk.underline("(YES or NO)")} :`)
           } while (!new Array("yes", "no").includes(joker_answer))
         }
 
@@ -387,7 +391,7 @@ async function main() {
 
   game.resetGame()
 }
-while(await question("Replay with same configuration (yes or no) ? ") == "yes")
+while(await question(`Replay with same configuration ${chalk.underline("(YES or NO)")} ? `) == "yes")
 
   rl.close()
 }
