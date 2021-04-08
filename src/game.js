@@ -205,6 +205,7 @@ async function main(){
 
   console.log('Number of players', game.howManyPlayers());
 
+  if(game.isPlayable()){
   let category
   do{
     category = await question(`Witch category do you want to play ? Rock or Techno : `)
@@ -215,7 +216,6 @@ async function main(){
   game.createQuestion();
   rl.close()
   
-  if(game.isPlayable()){
     do {
   
       game.roll(Math.floor(Math.random() * 6) + 1);
