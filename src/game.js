@@ -10,6 +10,7 @@ var Game = function () {
   var places = new Array(6);
   var purses = new Array(6);
   var inPenaltyBox = new Array(6);
+  var playersJokers = new Array(6);
 
   var popQuestions = new Array();
   var scienceQuestions = new Array();
@@ -83,6 +84,7 @@ var Game = function () {
     places[this.howManyPlayers() - 1] = 0;
     purses[this.howManyPlayers() - 1] = 0;
     inPenaltyBox[this.howManyPlayers() - 1] = false;
+    playersJokers[this.howManyPlayers() - 1] = true;
 
     console.log(playerName + " was added");
     console.log("They are player number " + players.length);
@@ -191,6 +193,21 @@ var Game = function () {
       currentPlayer = 0;
     return true;
   };
+  
+
+  this.currentUserHaveJoker = function (){
+    return playersJokers[currentPlayer]
+  }
+
+  this.jokerAnswer = function () {
+    console.log('Joker use');
+    playersJokers[currentPlayer] = false;
+
+    currentPlayer += 1;
+    if (currentPlayer == players.length)
+      currentPlayer = 0;
+    return true;
+  };
 };
 
 
@@ -219,16 +236,28 @@ async function main(){
     do {
   
       game.roll(Math.floor(Math.random() * 6) + 1);
-    
-      let answer
-      do{
-        answer = await question(`Your answer :`)
-      }while(isNaN(answer))
 
-      if (answer == 7) {
-        notAWinner = game.wrongAnswer();
+      let joker_answer
+      if (game.currentUserHaveJoker()){
+        
+        do{
+          joker_answer = await question(`Do you want to use a Joker ? (yes or no) :`)
+        }while(!new Array("yes", "no").includes(joker_answer))
+      }
+
+      if(joker_answer === "yes"){
+        notAWinner = game.jokerAnswer();
       } else {
-        notAWinner = game.wasCorrectlyAnswered();
+        let answer
+        do{
+          answer = await question(`Your answer :`)
+        }while(isNaN(answer))
+  
+        if (answer == 7) {
+          notAWinner = game.wrongAnswer();
+        } else {
+          notAWinner = game.wasCorrectlyAnswered();
+        }
       }
     
     } while (notAWinner);
